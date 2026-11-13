@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cogni — Seu dia e seu dinheiro, organizados numa frase</title>
+<style>
+:root{
+  --bg:#0A0F17; --card:#16181F; --line:#2C2D31;
+  --primary:#2962FF; --cyan:#00E5FF;
+  --blue:#2962FF; --yellow:#FFD600; --green:#00E676; --red:#F44336;
+  --text:#FFFFFF; --muted:#8E8E8E; --muted2:#B4B8C0;
+  --r:20px;
+  --font:Inter,Roboto,"Segoe UI","Helvetica Neue",Arial,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y proximity;scroll-behavior:smooth;background:var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:clamp(18px,1.5vw,26px);line-height:1.4;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+section{min-height:100vh;scroll-snap-align:start;display:flex;flex-direction:column;justify-content:center;padding:6vh 7vw 6vh 7vw;position:relative;overflow:hidden}
+section::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60vw 50vh at 85% 10%,rgba(41,98,255,.16),transparent 70%),radial-gradient(40vw 40vh at 5% 100%,rgba(0,229,255,.07),transparent 70%)}
+section>*{position:relative}
+.eyebrow{color:var(--cyan);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:.62em;margin-bottom:.8em}
+h1,h2,h3{font-weight:800;line-height:1.08;letter-spacing:-.02em}
+h2{font-size:clamp(34px,4.4vw,76px);margin-bottom:.5em;max-width:18ch}
+h2 em,h1 em{font-style:normal;color:var(--cyan)}
+.muted{color:var(--muted2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0)*90ms)}
+section.in .reveal{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}}
+
+/* phone frame */
+.phone{width:var(--w,260px);aspect-ratio:393/852;background:#000;border-radius:calc(var(--w,260px)*.13);padding:calc(var(--w,260px)*.032);
+  border:2px solid #34373f;box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(41,98,255,.18);flex:none}
+.phone img{width:100%;height:100%;display:block;border-radius:calc(var(--w,260px)*.1);object-fit:cover}
+
+/* nav dots */
+#dots{position:fixed;right:1.4vw;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;z-index:10}
+#dots button{width:12px;height:12px;border-radius:50%;border:2px solid var(--muted);background:transparent;cursor:pointer;transition:.25s}
+#dots button.on{background:var(--cyan);border-color:var(--cyan);transform:scale(1.35)}
+#hint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);font-size:13px;color:var(--muted);z-index:10;opacity:.8;background:rgba(10,15,23,.7);padding:4px 12px;border-radius:99px}
+#bar{position:fixed;left:0;top:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--cyan));width:0;z-index:11;transition:width .3s}
+
+/* 1 hero */
+#hero{flex-direction:row;align-items:center;justify-content:space-between;gap:4vw}
+#hero .txt{max-width:46vw}
+.logo{display:flex;align-items:center;gap:.5em;margin-bottom:1.2em}
+.logo i{width:1.4em;height:1.4em;border-radius:.45em;background:linear-gradient(135deg,var(--primary),var(--cyan));display:grid;place-items:center;font-style:normal;font-weight:800;font-size:1em}
+h1{padding-bottom:.12em;font-size:clamp(70px,10vw,170px);letter-spacing:-.04em;background:linear-gradient(90deg,#fff,#9fc0ff 60%,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.slogan{font-size:clamp(26px,3vw,52px);font-weight:700;line-height:1.15;margin-top:.4em}
+.sub{margin-top:1em;color:var(--muted2)}
+.hero-phones{position:relative;flex:none;width:clamp(260px,30vw,520px);display:flex;justify-content:center}
+.hero-phones .phone{--w:clamp(230px,19vw,340px)}
+.hero-phones .back{position:absolute;opacity:.55;transform:translate(-62%,6%) rotate(-7deg);--w:clamp(200px,16vw,290px)}
+.hero-phones .front{position:relative;transform:rotate(3deg);animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:rotate(3deg) translateY(-12px)}}
+
+/* 2 problem */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw;margin-top:2vh}
+.prob{padding:2.2vw;font-size:1.05em}
+.prob .n{font-size:3.2em;font-weight:800;color:var(--red);line-height:1;margin-bottom:.2em}
+.prob h3{font-size:1.35em;margin-bottom:.4em}
+.prob p{color:var(--muted2);font-size:.9em}
+.solves{margin-top:3vh;font-size:1.25em;font-weight:700}
+.solves em{font-style:normal;color:var(--green)}
+
+/* 3 how */
+.flow{display:grid;grid-template-columns:1.2fr auto 1fr auto 1.3fr;gap:1.6vw;align-items:stretch;margin-top:2vh}
+.step{padding:1.6vw;display:flex;flex-direction:column;gap:.7em}
+.step .k{color:var(--cyan);font-weight:800;font-size:.7em;letter-spacing:.14em}
+.step h3{font-size:1.3em}
+.arrow{align-self:center;color:var(--cyan);font-size:2.4em;font-weight:800}
+.bubble{background:#0d1118;border:1px solid var(--line);border-radius:16px;padding:.8em 1em;font-size:.82em;line-height:1.45;min-height:6.2em}
+.caret{display:inline-block;width:.07em;height:1em;background:var(--cyan);vertical-align:-.15em;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.ai{align-items:center;text-align:center;justify-content:center;background:linear-gradient(160deg,rgba(41,98,255,.35),rgba(0,229,255,.12));border-color:#2a4a99}
+.ai .orb{width:3.4em;height:3.4em;border-radius:50%;background:radial-gradient(circle at 30% 30%,var(--cyan),var(--primary));box-shadow:0 0 40px rgba(0,229,255,.5);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.1);box-shadow:0 0 70px rgba(0,229,255,.8)}}
+.ai small{color:var(--muted2);font-size:.62em}
+.out{display:flex;flex-direction:column;gap:.5em;font-size:.78em}
+.out .grp{font-size:.8em;font-weight:800;letter-spacing:.12em;color:var(--muted);margin-top:.3em}
+.row{display:flex;align-items:center;gap:.6em;background:#0d1118;border:1px solid var(--line);border-radius:12px;padding:.5em .8em}
+.row b{margin-left:auto;font-variant-numeric:tabular-nums}
+.dot{width:.8em;height:.8em;border-radius:50%;flex:none}
+.d-blue{background:var(--blue)}.d-yellow{background:var(--yellow)}.d-green{background:var(--green)}.d-red{background:var(--red)}
+.note{margin-top:2.2vh;color:var(--muted2);font-size:.85em}
+.note strong{color:var(--yellow)}
+
+/* 4 features */
+.grid6{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4vw;margin-top:1vh}
+.feat{padding:1.5vw;display:flex;flex-direction:column;gap:.5em;transition:transform .25s,border-color .25s}
+.feat:hover{transform:translateY(-4px);border-color:var(--primary)}
+.ico{width:2.6em;height:2.6em;border-radius:14px;display:grid;place-items:center;background:rgba(41,98,255,.18);color:var(--cyan)}
+.ico svg{width:1.5em;height:1.5em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.feat h3{font-size:1.15em}
+.feat p{font-size:.78em;color:var(--muted2);line-height:1.4}
+
+/* 5 colors */
+#cores .wrap{display:flex;gap:4vw;align-items:center;justify-content:space-between}
+.legend{display:flex;flex-direction:column;gap:2.2vh;flex:1}
+.leg{display:flex;align-items:center;gap:1.2em;padding:1vw 1.6vw}
+.leg .dot{width:2.2em;height:2.2em;box-shadow:0 0 30px currentColor}
+.leg h3{font-size:1.25em}.leg p{font-size:.78em;color:var(--muted2)}
+.cal{padding:1.6vw 2vw;flex:none;width:clamp(340px,34vw,560px)}
+.cal h4{font-size:1.1em;margin-bottom:.6em;display:flex;justify-content:space-between}
+.cal h4 span{color:var(--muted);font-weight:500;font-size:.8em}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:.3em;text-align:center}
+.cg .wd{color:var(--muted);font-size:.6em;font-weight:700;padding-bottom:.4em}
+.cg .d{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;font-size:.78em;gap:2px}
+.cg .d .ds{display:flex;gap:3px;height:.55em}
+.cg .d .ds i{width:.5em;height:.5em;border-radius:50%;display:block}
+.cg .d.sel{background:rgba(41,98,255,.28);outline:2px solid var(--primary)}
+.cg .d.today{color:var(--cyan);font-weight:800}
+.cg .d.m{opacity:.0}
+
+/* 6 gallery */
+#galeria{padding-left:0;padding-right:0}
+#galeria .head{padding:0 7vw}
+#strip{display:flex;gap:2.2vw;overflow-x:auto;padding:2vh 7vw 3vh;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}
+#strip::-webkit-scrollbar{display:none}
+#strip figure{flex:none;scroll-snap-align:center;text-align:center}
+#strip .phone{--w:clamp(190px,17vw,300px)}
+#strip figcaption{margin-top:1em;font-weight:700;font-size:.8em}
+#strip figcaption small{display:block;color:var(--muted);font-weight:400;font-size:.8em}
+
+/* 7 tech */
+.arch{display:grid;grid-template-columns:1fr auto 1.3fr;gap:2vw;align-items:center;margin-top:1vh}
+.app{padding:1.8vw;text-align:center;border-color:var(--primary);background:linear-gradient(160deg,rgba(41,98,255,.3),var(--card))}
+.app h3{font-size:1.5em}.app p{font-size:.75em;color:var(--muted2);margin-top:.4em}
+.links{display:flex;flex-direction:column;gap:2.4vh;color:var(--cyan);font-size:2em;font-weight:800;text-align:center}
+.svcs{display:flex;flex-direction:column;gap:1.4vh}
+.svc{padding:1vw 1.4vw;display:flex;gap:1em;align-items:center}
+.svc .tag{flex:none;font-size:.6em;font-weight:800;letter-spacing:.1em;color:var(--bg);background:var(--cyan);padding:.3em .7em;border-radius:99px}
+.svc h3{font-size:1em}.svc p{font-size:.7em;color:var(--muted2)}
+.chips{display:flex;flex-wrap:wrap;gap:.6em;margin-top:2.4vh}
+.chip{padding:.45em 1em;border-radius:99px;border:1px solid var(--line);background:var(--card);font-size:.72em;color:var(--muted2)}
+.chip b{color:#fff}
+
+/* 8 end */
+#fim{align-items:center;text-align:center}
+#fim h2{max-width:none;font-size:clamp(46px,7vw,120px)}
+#fim .by{font-size:1.5em;margin-top:.6em}
+#fim .by strong{color:var(--cyan)}
+.gh{display:inline-flex;align-items:center;gap:.6em;margin-top:1.4em;padding:.7em 1.4em;border-radius:99px;background:var(--card);border:1px solid var(--line);color:#fff;text-decoration:none;font-weight:700;transition:.25s}
+.gh:hover{border-color:var(--cyan);color:var(--cyan)}
+.gh svg{width:1.3em;height:1.3em;fill:currentColor}
+
+/* smaller / portrait screens */
+@media (max-width:900px){
+  #hero{flex-direction:column;text-align:center}#hero .txt{max-width:100%}.hero-phones{display:none}
+  .three,.grid6,.arch{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}
+  #cores .wrap{flex-direction:column}.links{display:none}#dots{display:none}
+}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav id="dots" aria-label="Seções"></nav>
+<div id="hint">← → ↑ ↓ / espaço: navegar · F: tela cheia</div>
+
+<!-- 1. HERO -->
+<section id="hero" data-title="Início">
+  <div class="txt">
+    <div class="logo reveal"><i>C</i><span class="eyebrow" style="margin:0">App Android · Projeto acadêmico</span></div>
+    <h1 class="reveal" style="--i:1">Cogni</h1>
+    <p class="slogan reveal" style="--i:2">Seu dia e seu dinheiro,<br><em style="font-style:normal;color:var(--cyan)">organizados numa frase.</em></p>
+    <p class="sub reveal" style="--i:3">Agenda + finanças + assistente de IA que entende como você fala.</p>
+  </div>
+  <div class="hero-phones reveal" style="--i:2">
+    <div class="phone back"><img src="img/assistant.png" alt="Assistente do Cogni"></div>
+    <div class="phone front"><img src="img/overview.png" alt="Tela Financeiro do Cogni"></div>
+  </div>
+</section>
+
+<!-- 2. PROBLEMA -->
+<section id="problema" data-title="O problema">
+  <div class="eyebrow reveal">O problema</div>
+  <h2 class="reveal" style="--i:1">Agenda e dinheiro <em>não conversam.</em></h2>
+  <div class="three">
+    <div class="card prob reveal" style="--i:2"><div class="n">1</div><h3>Apps separados</h3><p>Um app para a agenda, outro (ou uma planilha) para os gastos.</p></div>
+    <div class="card prob reveal" style="--i:3"><div class="n">2</div><h3>Nada se conecta</h3><p>O jantar está na agenda, mas o gasto dele não está em lugar nenhum.</p></div>
+    <div class="card prob reveal" style="--i:4"><div class="n">3</div><h3>Registrar é chato</h3><p>Dá preguiça de preencher formulário. Resultado: ninguém registra.</p></div>
+  </div>
+  <p class="solves reveal" style="--i:5">O Cogni deixa você escrever <em>do jeito que fala</em> — e liga compromisso ↔ gasto sozinho.</p>
+</section>
+
+<!-- 3. COMO FUNCIONA -->
+<section id="como" data-title="Como funciona">
+  <div class="eyebrow reveal">Como funciona</div>
+  <h2 class="reveal" style="--i:1">Uma frase. <em>Dois mundos</em> organizados.</h2>
+  <div class="flow">
+    <div class="card step reveal" style="--i:2">
+      <div class="k">1 · VOCÊ ESCREVE</div>
+      <div class="bubble" id="typed" data-text="dia 18 vou ao cinema às 21h30 gastar R$60 e antes, às 19h, R$450 no japonês"></div>
+    </div>
+    <div class="arrow reveal" style="--i:3">→</div>
+    <div class="card step ai reveal" style="--i:3">
+      <div class="k">2 · A IA ENTENDE</div>
+      <div class="orb"></div>
+      <h3>Interpreta</h3>
+      <small>Devolve JSON, validado antes de gravar</small>
+    </div>
+    <div class="arrow reveal" style="--i:4">→</div>
+    <div class="card step reveal" style="--i:4">
+      <div class="k">3 · O COGNI REGISTRA</div>
+      <div class="out">
+        <div class="grp">AGENDA · 18/11</div>
+        <div class="row"><span class="dot d-blue"></span>19:00 Japonês</div>
+        <div class="row"><span class="dot d-blue"></span>21:30 Cinema</div>
+        <div class="grp">FINANCEIRO · PREVISTOS</div>
+        <div class="row"><span class="dot d-yellow"></span>Japonês <b>R$ 450,00</b></div>
+        <div class="row"><span class="dot d-yellow"></span>Cinema <b>R$ 60,00</b></div>
+      </div>
+    </div>
+  </div>
+  <p class="note reveal" style="--i:5">2 compromissos + 2 gastos <strong>previstos</strong>. O Cogni nunca marca como “pago” algo que ainda vai acontecer.</p>
+</section>
+
+<!-- 4. FUNCIONALIDADES -->
+<section id="funcoes" data-title="Funcionalidades">
+  <div class="eyebrow reveal">Funcionalidades</div>
+  <h2 class="reveal" style="--i:1">Tudo num só lugar.</h2>
+  <div class="grid6">
+    <div class="card feat reveal" style="--i:2"><div class="ico"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg></div><h3>Assistente de IA</h3><p>Frases viram compromissos, gastos, receitas, metas e gastos fixos.</p></div>
+    <div class="card feat reveal" style="--i:3"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><circle cx="9" cy="15" r=".8"/><circle cx="14" cy="15" r=".8"/></svg></div><h3>Agenda com bolinhas</h3><p>Uma bolinha por categoria em cada dia. Dá pra ver o mês num olhar.</p></div>
+    <div class="card feat reveal" style="--i:4"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h13v4"/><path d="M3 7v11a2 2 0 002 2h15V9H5a2 2 0 01-2-2z"/><circle cx="16.5" cy="14.5" r="1"/></svg></div><h3>Financeiro</h3><p>“Disponível até o próximo salário”, saldo, comprometido, investido e patrimônio.</p></div>
+    <div class="card feat reveal" style="--i:5"><div class="ico"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></div><h3>Extrato e planejamento</h3><p>Realizados e planejados, assinaturas com data final e projeção de caixa de 90 dias.</p></div>
+    <div class="card feat reveal" style="--i:6"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div><h3>Investimentos e metas</h3><p>CDI real do Banco Central, projeções de 1/5/10 anos e quanto aportar para a meta.</p></div>
+    <div class="card feat reveal" style="--i:7"><div class="ico"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><h3>Conciliação automática</h3><p>“Gastei R$40 no corte” acha o corte agendado e marca como pago.</p></div>
+  </div>
+</section>
+
+<!-- 5. CORES -->
+<section id="cores" data-title="Cores da agenda">
+  <div class="eyebrow reveal">Agenda com bolinhas</div>
+  <h2 class="reveal" style="--i:1">Quatro cores, <em>zero confusão.</em></h2>
+  <div class="wrap">
+    <div class="legend">
+      <div class="card leg reveal" style="--i:2"><span class="dot d-blue" style="color:var(--blue)"></span><div><h3>Compromisso</h3><p>Algo que você vai fazer</p></div></div>
+      <div class="card leg reveal" style="--i:3"><span class="dot d-yellow" style="color:var(--yellow)"></span><div><h3>Gasto previsto</h3><p>Dinheiro que vai sair</p></div></div>
+      <div class="card leg reveal" style="--i:4"><span class="dot d-green" style="color:var(--green)"></span><div><h3>Recebimento</h3><p>Dinheiro que vai entrar</p></div></div>
+      <div class="card leg reveal" style="--i:5"><span class="dot d-red" style="color:var(--red)"></span><div><h3>Gasto realizado</h3><p>Já aconteceu e foi pago</p></div></div>
+    </div>
+    <div class="card cal reveal" style="--i:4" id="cal"></div>
+  </div>
+</section>
+
+<!-- 6. GALERIA -->
+<section id="galeria" data-title="Telas">
+  <div class="head">
+    <div class="eyebrow reveal">Telas do app</div>
+    <h2 class="reveal" style="--i:1">Veja <em>por dentro.</em></h2>
+  </div>
+  <div id="strip" class="reveal" style="--i:2">
+    <figure><div class="phone"><img src="img/overview.png" alt="Financeiro"></div><figcaption>Financeiro<small>Disponível até o salário</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/assistant.png" alt="Assistente"></div><figcaption>Assistente<small>Prévia antes de salvar</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/statement.png" alt="Extrato"></div><figcaption>Extrato<small>Realizados e planejados</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/planning.png" alt="Planejamento"></div><figcaption>Planejamento<small>Gastos fixos e projeção</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/cycle.png" alt="Ciclo"></div><figcaption>Ciclo<small>Até o próximo salário</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/investments.png" alt="Investimentos"></div><figcaption>Investimentos<small>Carteira e patrimônio</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/cdi-chart.png" alt="CDI"></div><figcaption>CDI<small>Dados do Banco Central</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/investment-comparison.png" alt="Comparação"></div><figcaption>Comparação<small>Cenários de investimento</small></figcaption></figure>
+    <figure><div class="phone"><img src="img/goals.png" alt="Metas"></div><figcaption>Metas<small>Quanto aportar</small></figcaption></figure>
+  </div>
+</section>
+
+<!-- 7. TECNOLOGIA -->
+<section id="tech" data-title="Tecnologia">
+  <div class="eyebrow reveal">Tecnologia</div>
+  <h2 class="reveal" style="--i:1">Por baixo do <em>capô.</em></h2>
+  <div class="arch">
+    <div class="card app reveal" style="--i:2"><h3>App Android</h3><p>Java nativo · SDK 37 (mín. 24)<br>Material Components</p></div>
+    <div class="links reveal" style="--i:3"><span>⇄</span><span>⇄</span><span>⇄</span></div>
+    <div class="svcs">
+      <div class="card svc reveal" style="--i:3"><span class="tag">FIREBASE</span><div><h3>Authentication + Cloud Firestore</h3><p>Dados isolados por usuário · transações com controle de revisão</p></div></div>
+      <div class="card svc reveal" style="--i:4"><span class="tag">IA</span><div><h3>Groq · openai/gpt-oss-120b</h3><p>Resposta em JSON, validada antes de gravar</p></div></div>
+      <div class="card svc reveal" style="--i:5"><span class="tag">BACEN</span><div><h3>API pública do Banco Central</h3><p>Série SGS 12 · CDI real</p></div></div>
+    </div>
+  </div>
+  <div class="chips reveal" style="--i:6">
+    <span class="chip"><b>Valores em centavos</b> (long) — sem erro de arredondamento</span>
+    <span class="chip"><b>Variante offline</b> (localDebug) com interpretador local de frases</span>
+  </div>
+</section>
+
+<!-- 8. FIM -->
+<section id="fim" data-title="Encerramento">
+  <div class="eyebrow reveal">Obrigada!</div>
+  <h2 class="reveal" style="--i:1">Seu dia e seu dinheiro,<br><em>numa frase.</em></h2>
+  <p class="by reveal" style="--i:2">Feito por <strong>Amanda Mayumi</strong></p>
+  <a class="gh reveal" style="--i:3" href="https://github.com/Amand4May/ia-organizer" target="_blank" rel="noopener">
+    <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+    github.com/Amand4May/ia-organizer
+  </a>
+</section>
+
+<script>
+(function(){
+  const secs=[...document.querySelectorAll('section')];
+  const dots=document.getElementById('dots'), bar=document.getElementById('bar');
+  const strip=document.getElementById('strip');
+  let cur=0;
+
+  // dots
+  secs.forEach((s,i)=>{const b=document.createElement('button');b.title=s.dataset.title;b.setAttribute('aria-label',s.dataset.title);b.onclick=()=>go(i);dots.appendChild(b)});
+
+  // calendar (Novembro/2026: dia 1 = domingo)
+  (function(){
+    const el=document.getElementById('cal');
+    const ev={3:['g'],5:['r'],10:['b'],13:['y'],18:['b','y'],20:['b'],25:['b','y'],27:['g']};
+    const col={b:'--blue',y:'--yellow',g:'--green',r:'--red'};
+    let h='<h4>Novembro 2026<span>Agenda</span></h4><div class="cg">';
+    ['D','S','T','Q','Q','S','S'].forEach(w=>h+='<div class="wd">'+w+'</div>');
+    for(let d=1;d<=30;d++){
+      const dots=(ev[d]||[]).map(c=>'<i style="background:var('+col[c]+')"></i>').join('');
+      h+='<div class="d'+(d===18?' sel':'')+(d===13?' today':'')+'">'+d+'<span class="ds">'+dots+'</span></div>';
+    }
+    el.innerHTML=h+'</div>';
+  })();
+
+  // typing
+  const typed=document.getElementById('typed');let typedDone=false;
+  function typeIt(){
+    if(typedDone)return;typedDone=true;
+    const t=typed.dataset.text;let i=0;
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){typed.textContent='“'+t+'”';return}
+    (function tick(){typed.innerHTML='“'+t.slice(0,i)+'<span class="caret"></span>';if(i++<t.length)setTimeout(tick,32);else typed.innerHTML='“'+t+'”'})();
+  }
+  typed.innerHTML='<span class="caret"></span>';
+
+  // observe sections: reveal + current index
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        if(e.target.id==='como')setTimeout(typeIt,500);
+      }
+      if(e.intersectionRatio>=.5){cur=secs.indexOf(e.target);paint()}
+    });
+  },{threshold:[.15,.5]});
+  secs.forEach(s=>io.observe(s));
+  secs[0].classList.add('in');
+
+  function paint(){
+    [...dots.children].forEach((b,i)=>b.classList.toggle('on',i===cur));
+    bar.style.width=((cur+1)/secs.length*100)+'%';
+  }
+  paint();
+
+  function go(i){
+    i=Math.max(0,Math.min(secs.length-1,i));
+    secs[i].scrollIntoView({behavior:'smooth',block:'start'});
+  }
+
+  // gallery stepping
+  function stripStep(dir){
+    const figs=[...strip.children];
+    const c=strip.scrollLeft+strip.clientWidth/2;
+    let idx=figs.findIndex(f=>f.offsetLeft+f.offsetWidth>c);
+    if(idx<0)idx=figs.length-1;
+    const n=idx+dir;
+    if(n<0||n>=figs.length)return false;
+    const f=figs[n];
+    strip.scrollTo({left:f.offsetLeft-(strip.clientWidth-f.offsetWidth)/2,behavior:'smooth'});
+    return true;
+  }
+  function next(){ if(secs[cur].id==='galeria'&&stripStep(1))return; go(cur+1) }
+  function prev(){ if(secs[cur].id==='galeria'&&stripStep(-1))return; go(cur-1) }
+
+  addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    switch(e.key){
+      case 'ArrowRight':case 'ArrowDown':case 'PageDown':case ' ':case 'Enter':e.preventDefault();next();break;
+      case 'ArrowLeft':case 'ArrowUp':case 'PageUp':e.preventDefault();prev();break;
+      case 'Home':e.preventDefault();go(0);break;
+      case 'End':e.preventDefault();go(secs.length-1);break;
+      case 'f':case 'F':document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();break;
+    }
+  });
+  // Space+shift goes back
+  addEventListener('keydown',e=>{if(e.key===' '&&e.shiftKey){e.stopImmediatePropagation();e.preventDefault();prev()}},true);
+
+  // hide hint after a while
+  setTimeout(()=>{const h=document.getElementById('hint');h.style.transition='opacity 1s';h.style.opacity='0'},9000);
+})();
+</script>
+</body>
+</html>
